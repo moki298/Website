@@ -3,7 +3,7 @@ import {useHistory, useParams} from 'react-router-dom';
 
 import {REPOSITORY_FILTERS} from 'constants/github';
 
-import {BreadcrumbMenu, FlatNavLinks, TimeFilter} from 'components';
+import {BreadcrumbMenu, EmptyPage, FlatNavLinks, Loader, TimeFilter} from 'components';
 import {Repository, RepositoryUrlParams, Time, TimeFilterType} from 'types/github';
 import {Contributor} from 'types/thenewboston';
 import {fetchContributors} from 'utils/thenewboston';
@@ -49,12 +49,13 @@ const Leaderboard = () => {
   };
 
   const renderContributors = () => {
-    return contributors.map(({display_name, github_username}, index) => (
+    if (error || !contributors.length) return <EmptyPage />;
+    return contributors.map(({account_number, display_name, github_username, pk, profile_image}, index) => (
       <LeaderboardContributor
-        account_number={display_name}
-        github_avatar_url=""
+        account_number={account_number}
+        github_avatar_url={profile_image}
         github_username={github_username}
-        key={github_username}
+        key={pk}
         rank={index + 1}
         tasks={[]}
         total_earnings={1}
@@ -89,7 +90,9 @@ const Leaderboard = () => {
       <div className="Leaderboard">
         {renderTopSections()}
         <div className="Leaderboard__left-menu">{renderNavLinks()}</div>
-        <div className="Leaderboard__contributor-list">{renderContributors()}</div>
+        <div className="Leaderboard__contributor-list">
+          {loading ? <Loader className="Leaderboard__Loader" /> : renderContributors()}
+        </div>
       </div>
     </>
   );
