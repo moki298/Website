@@ -1,23 +1,4 @@
-import {SocialMedia} from 'types/social-media';
-
-export interface ApplicationMethod {
-  channel: SocialMedia;
-  note?: string;
-}
-
-export interface Opening {
-  applicationMethods: ApplicationMethod[];
-  category: OpeningCategory;
-  description: string;
-  openingId: string;
-  payNotes: string[];
-  position: string;
-  reportsTo: Reportee[];
-  responsibilities: string[];
-  technologyRequirements: string[];
-}
-
-export enum OpeningCategory {
+export enum OpeningTeam {
   all = 'All',
   accounting = 'Accounting',
   community = 'Community',
@@ -27,7 +8,7 @@ export enum OpeningCategory {
 }
 
 export interface OpeningsUrlParams {
-  openingId: OpeningCategory;
+  openingId: OpeningTeam;
 }
 
 export interface Reportee {

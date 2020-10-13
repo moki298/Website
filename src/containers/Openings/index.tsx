@@ -1,41 +1,56 @@
-import React, {FC, ReactNode, useCallback, useMemo, useState} from 'react';
+import React, {FC, ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
 import {BreadcrumbMenu, EmptyPage, FlatNavLinks} from 'components';
 import {useScrollToTopContainer} from 'hooks';
-import {OpeningCategory, OpeningsUrlParams} from 'types/openings';
-import {getOpenings} from 'utils/data';
+import {Opening} from 'types/thenewboston';
+import {OpeningsUrlParams, OpeningTeam} from 'types/openings';
+import {fetchOpenings} from 'utils/thenewboston';
 
 import OpeningDetails from './OpeningDetails';
 import OpeningsOpening from './OpeningsOpening';
 import './Openings.scss';
 
-const openings = getOpenings();
-
 const OPENING_CATEGORY_FILTERS = [
-  OpeningCategory.all,
-  OpeningCategory.accounting,
-  OpeningCategory.community,
-  OpeningCategory.design,
-  OpeningCategory.engineering,
-  OpeningCategory.marketing,
+  OpeningTeam.all,
+  OpeningTeam.accounting,
+  OpeningTeam.community,
+  OpeningTeam.design,
+  OpeningTeam.engineering,
+  OpeningTeam.marketing,
 ];
 
 const Openings: FC = () => {
   const {openingId: openingIdParam} = useParams<OpeningsUrlParams>();
-  const [categoryFilter, setCategoryFilter] = useState<OpeningCategory>(OpeningCategory.all);
+  const [categoryFilter, setCategoryFilter] = useState<OpeningTeam>(OpeningTeam.all);
+  const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [openings, setOpenings] = useState<Opening[]>([]);
   const openingDetailsContainer = useScrollToTopContainer<HTMLDivElement>([openingIdParam]);
 
+  useEffect(() => {
+    const fetchData = async (): Promise<void> => {
+      try {
+        const results = await fetchOpenings();
+        setOpenings(results);
+      } catch (err) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const filteredOpenings = useMemo(
-    () =>
-      categoryFilter === OpeningCategory.all ? openings : openings.filter(({category}) => category === categoryFilter),
-    [categoryFilter],
+    () => (categoryFilter === OpeningTeam.all ? openings : openings.filter(({team}) => team === categoryFilter)),
+    [categoryFilter, openings],
   );
 
-  const opening = useMemo(() => openings.find(({openingId}) => openingId === openingIdParam) || null, [openingIdParam]);
+  const opening = useMemo(() => openings.find(({pk}) => pk === openingIdParam) || null, [openingIdParam, openings]);
 
   const handleNavOptionClick = useCallback(
-    (option: OpeningCategory) => (): void => {
+    (option: OpeningTeam) => (): void => {
       setCategoryFilter(option);
     },
     [setCategoryFilter],
@@ -43,7 +58,7 @@ const Openings: FC = () => {
 
   const renderCategoryFilter = (): ReactNode => {
     return (
-      <FlatNavLinks<OpeningCategory>
+      <FlatNavLinks<OpeningTeam>
         handleOptionClick={handleNavOptionClick}
         options={OPENING_CATEGORY_FILTERS}
         selectedOption={categoryFilter}
@@ -53,8 +68,8 @@ const Openings: FC = () => {
 
   const renderOpenings = (): ReactNode => {
     if (!filteredOpenings.length) return <EmptyPage />;
-    return filteredOpenings.map(({description, openingId, position}) => (
-      <OpeningsOpening description={description} key={position} openingId={openingId} position={position} />
+    return filteredOpenings.map(({description, pk, title}) => (
+      <OpeningsOpening description={description} key={pk} pk={pk} title={title} />
     ));
   };
 

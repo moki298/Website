@@ -50,7 +50,7 @@ const Leaderboard = () => {
 
   const renderContributors = () => {
     if (error || !contributors.length) return <EmptyPage />;
-    return contributors.map(({account_number, display_name, github_username, pk, profile_image}, index) => (
+    return contributors.map(({account_number, github_username, pk, profile_image}, index) => (
       <LeaderboardContributor
         account_number={account_number}
         github_avatar_url={profile_image}

@@ -2,7 +2,7 @@ import React, {FC, ReactNode} from 'react';
 import {useHistory, useLocation} from 'react-router-dom';
 import {A, Icon, IconType, MarketingButton} from 'components';
 
-import {Opening} from 'types/openings';
+import {Opening} from 'types/thenewboston';
 import {SocialMedia} from 'types/social-media';
 
 import './OpeningDetails.scss';
@@ -33,12 +33,13 @@ const OpeningDetails: FC<ComponentProps> = ({opening}) => {
     history.replace('/openings');
   };
 
+  // TODO: Update customLink
   const renderApplicationMethodList = (): ReactNode => {
-    const rows = opening.applicationMethods.map(({channel, note}) => (
+    const rows = ([] as any[]).map(({channel, note}) => (
       <div className="OpeningDetails__application-method-row" key={channel}>
         <MarketingButton
           className="OpeningDetails__MarketingButton"
-          customLink={customLinks[channel]}
+          customLink={customLinks[SocialMedia.facebook]}
           website={channel}
         />
         {note && <span className="OpeningDetails__application-method-note">{note}</span>}
@@ -59,18 +60,18 @@ const OpeningDetails: FC<ComponentProps> = ({opening}) => {
 
   const renderContent = (): ReactNode => (
     <>
-      <div className="OpeningDetails__position">{opening.position}</div>
+      <div className="OpeningDetails__position">{opening.title}</div>
       <div className="OpeningDetails__description">{opening.description}</div>
       {renderStringList(opening.responsibilities, 'Responsibilities')}
-      {renderStringList(opening.technologyRequirements, 'Technology Requirements')}
+      {renderStringList(opening.skills, 'Technology Requirements')}
       {renderReportsToList()}
-      {renderStringList(opening.payNotes, 'Pay')}
+      {renderStringList([opening.pay_per_day], 'Pay')}
       {renderApplicationMethodList()}
     </>
   );
 
   const renderReportsToList = (): ReactNode => {
-    const listItems = opening.reportsTo.map(({githubUsername, name}) => (
+    const listItems = ([] as any[]).map(({githubUsername, name}) => (
       <li key={name}>
         {name}{' '}
         {githubUsername && (
@@ -91,7 +92,7 @@ const OpeningDetails: FC<ComponentProps> = ({opening}) => {
     );
   };
 
-  const renderStringList = (listData: string[], listLabel: string): ReactNode => {
+  const renderStringList = (listData: (number | string)[], listLabel: string): ReactNode => {
     return (
       <>
         <div className="OpeningDetails__list-label">{listLabel}</div>
